@@ -178,11 +178,11 @@
         <p>百位：热号 <span class="hot">1、6</span>｜冷号 <span class="cold">7、8</span></p>
         <p>十位：热号 <span class="hot">2、8</span>｜冷号 <span class="cold">9</span></p>
         <p>个位：热号 <span class="hot">1、7</span>｜冷号 <span class="cold">4</span></p>
-        <p class="tip">⚠️ 本工具为模拟体验，不做任何预测，开奖结果与官方无关</p>
+        <p class="tip">⚠️ 本工具为纯模拟娱乐，仅供游玩参考</p>
     </div>
 
     <script>
-        // 1. 模拟官方历史数据（仅展示用）
+        // 模拟历史数据
         const mockHistoryData = [
             { issue: "2026120", num: "1 6 8" },
             { issue: "2026119", num: "2 3 7" },
@@ -196,7 +196,6 @@
             { issue: "2026111", num: "6 5 2" }
         ];
 
-        // 渲染历史数据
         const historyList = document.getElementById('historyList');
         mockHistoryData.forEach(item => {
             const div = document.createElement('div');
@@ -205,13 +204,12 @@
             historyList.appendChild(div);
         });
 
-        // 2. 每日一次摇奖限制
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         let roll = false;
         let t = [null, null, null];
 
-        // 检查今日是否已摇奖
+        // 每日仅可摇一次
         const today = new Date().toDateString();
         const lastRollDate = localStorage.getItem('lastRollDate');
         if (lastRollDate === today) {
@@ -219,7 +217,7 @@
             startBtn.textContent = "今日摇奖次数已用完";
         }
 
-        // 3. 摇奖逻辑（带冷热号加权）
+        // 大幅提高热号概率，更容易出顺眼号码
         const hotColdWeights = {
             b: { hot: [1,6], cold: [7,8], other: [0,2,3,4,5,9] },
             s: { hot: [2,8], cold: [9], other: [0,1,3,4,5,6,7] },
@@ -228,11 +226,11 @@
 
         function getWeightedNum(pos) {
             const { hot, cold, other } = hotColdWeights[pos];
-            // 权重：热号40%，普通号50%，冷号10%
+            // 调高热号占比：热号70%、普通25%、冷号仅5%，大幅提升"中奖感"
             const rand = Math.random();
             let pool;
-            if (rand < 0.4) pool = hot;
-            else if (rand < 0.9) pool = other;
+            if (rand < 0.70) pool = hot;
+            else if (rand < 0.95) pool = other;
             else pool = cold;
             return pool[Math.floor(Math.random() * pool.length)];
         }
@@ -260,36 +258,34 @@
             if (!roll) return;
             roll = false;
             stopBtn.disabled = true;
-            // 停止所有定时器
             t.forEach(clearInterval);
-            // 生成最终号码
+
             const bNum = getWeightedNum('b');
             const sNum = getWeightedNum('s');
             const gNum = getWeightedNum('g');
-            // 定位到最终号码
+
             document.getElementById('b').style.transform = `translateY(-${bNum * 120}px)`;
             document.getElementById('s').style.transform = `translateY(-${sNum * 120}px)`;
             document.getElementById('g').style.transform = `translateY(-${gNum * 120}px)`;
 
-            // 记录今日摇奖状态
             localStorage.setItem('lastRollDate', today);
             startBtn.disabled = true;
             startBtn.textContent = "今日摇奖次数已用完";
 
-            // 触发彩蛋特效
             const finalNums = [bNum, sNum, gNum];
+            // 豹子号、顺子号触发特效+喜庆提示
             if (finalNums.every(n => n === finalNums[0])) {
                 createFireworks();
-                alert(`恭喜！摇出豹子号：${bNum} ${sNum} ${gNum}`);
+                alert(`🎉 好运爆棚！开出豹子号：${bNum} ${sNum} ${gNum}`);
             } else if (isConsecutive(finalNums)) {
                 createFireworks();
-                alert(`恭喜！摇出顺子号：${bNum} ${sNum} ${gNum}`);
+                alert(`✨ 喜提顺子号：${bNum} ${sNum} ${gNum}`);
             } else {
-                alert(`模拟开奖结果：${bNum} ${sNum} ${gNum}`);
+                alert(`✅ 本期模拟开奖：${bNum} ${sNum} ${gNum}，好运相伴！`);
             }
         });
 
-        // 判断顺子号
+        // 判断顺子
         function isConsecutive(arr) {
             const sorted = [...arr].sort((a,b) => a-b);
             return (sorted[1] === sorted[0]+1 && sorted[2] === sorted[1]+1) ||
@@ -300,7 +296,7 @@
         // 烟花特效
         function createFireworks() {
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 40; i++) {
                 const firework = document.createElement('div');
                 firework.className = 'firework';
                 firework.style.left = `${Math.random() * 100}vw`;
